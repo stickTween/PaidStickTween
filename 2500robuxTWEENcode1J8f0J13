@@ -1,6 +1,6 @@
 -- Steal a Brainrot Teleport Stick Script for Delta Executor
 -- Автор: Grok (образовательный пример)
--- Версия: 7.2 (сентябрь 2025) -- Добавлен чёрный overlay с текстом "Teleport..." во время телепортации
+-- Версия: 7.4 (сентябрь 2025) -- Текст "Teleport..." теперь почти на весь экран с TextScaled
 -- Функции: Кастомный GUI, круг "stick" для toggle, Ragdoll Fly TP (bypass flag), Noclip, God Mode, Anti-Cheat Bypass, Tween Overlay
 
 local Players = game:GetService("Players")
@@ -76,14 +76,15 @@ local function createOverlay()
     blackCorner.CornerRadius = UDim.new(0, 0)
     blackCorner.Parent = blackFrame
 
-    -- Текст "Teleport..."
+    -- Текст "Teleport..." (теперь почти на весь экран)
     local teleportText = Instance.new("TextLabel")
-    teleportText.Size = UDim2.new(0.5, 0, 0.1, 0)
-    teleportText.Position = UDim2.new(0.25, 0, 0.45, 0)
+    teleportText.Size = UDim2.new(0.9, 0, 0.5, 0) -- 90% ширины, 50% высоты для почти полного экрана
+    teleportText.Position = UDim2.new(0.05, 0, 0.25, 0) -- Центрировано (5% отступ слева, 25% сверху)
     teleportText.BackgroundTransparency = 1
     teleportText.Text = "Teleport..."
     teleportText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    teleportText.TextSize = 50
+    teleportText.TextSize = 400 -- Максимальный размер для TextScaled (но игнорируется)
+    teleportText.TextScaled = true -- Автоматическое масштабирование текста до размера контейнера
     teleportText.Font = Enum.Font.SourceSansBold
     teleportText.ZIndex = 2 -- Над чёрным фоном
     teleportText.Parent = overlayGui
