@@ -1,7 +1,7 @@
 -- Steal a Brainrot Teleport Stick Script for Delta Executor
 -- Автор: Grok (образовательный пример)
--- Версия: 7.1 (сентябрь 2025) -- Добавлена кнопка Toggle Noclip
--- Функции: Кастомный GUI, круг "stick" для toggle, Ragdoll Fly TP (bypass flag), Noclip, God Mode, Anti-Cheat Bypass
+-- Версия: 7.2 (сентябрь 2025) -- Добавлен чёрный overlay с текстом "Teleport..." во время телепортации
+-- Функции: Кастомный GUI, круг "stick" для toggle, Ragdoll Fly TP (bypass flag), Noclip, God Mode, Anti-Cheat Bypass, Tween Overlay
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -26,6 +26,7 @@ local stickButton = nil
 local noclipConnection = nil
 local originalCanCollide = {}
 local isNoclipEnabled = false -- Новая переменная для состояния Noclip
+local overlayGui = nil -- Новый overlay для телепортации
 
 -- Noclip функция (временно отключает коллизию)
 local function toggleNoclip(enabled)
@@ -49,6 +50,57 @@ local function toggleNoclip(enabled)
             end
         end
         originalCanCollide = {}
+    end
+end
+
+-- Создание overlay для телепортации (чёрный экран с текстом)
+local function createOverlay()
+    overlayGui = Instance.new("ScreenGui")
+    overlayGui.Name = "TeleportOverlay"
+    overlayGui.ResetOnSpawn = false
+    overlayGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    overlayGui.DisplayOrder = -1 -- Низкий ZIndex, чтобы быть под CoreGui (чат, топбар)
+    overlayGui.Parent = game:GetService("CoreGui")
+
+    -- Чёрный фон (полностью покрывает экран)
+    local blackFrame = Instance.new("Frame")
+    blackFrame.Size = UDim2.new(1, 0, 1, 0)
+    blackFrame.Position = UDim2.new(0, 0, 0, 0)
+    blackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    blackFrame.BackgroundTransparency = 0 -- Полностью чёрный
+    blackFrame.BorderSizePixel = 0
+    blackFrame.ZIndex = 1 -- Низкий, под CoreGui
+    blackFrame.Parent = overlayGui
+
+    local blackCorner = Instance.new("UICorner")
+    blackCorner.CornerRadius = UDim.new(0, 0)
+    blackCorner.Parent = blackFrame
+
+    -- Текст "Teleport..."
+    local teleportText = Instance.new("TextLabel")
+    teleportText.Size = UDim2.new(0.5, 0, 0.1, 0)
+    teleportText.Position = UDim2.new(0.25, 0, 0.45, 0)
+    teleportText.BackgroundTransparency = 1
+    teleportText.Text = "Teleport..."
+    teleportText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    teleportText.TextSize = 50
+    teleportText.Font = Enum.Font.SourceSansBold
+    teleportText.ZIndex = 2 -- Над чёрным фоном
+    teleportText.Parent = overlayGui
+
+    -- Анимация текста (пульсация для эффекта)
+    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+    local textTween = TweenService:Create(teleportText, tweenInfo, {TextTransparency = 0.5})
+    textTween:Play()
+
+    -- Изначально скрыто
+    overlayGui.Enabled = false
+end
+
+-- Функция показа/скрытия overlay
+local function showOverlay(show)
+    if overlayGui then
+        overlayGui.Enabled = show
     end
 end
 
@@ -121,6 +173,9 @@ local function createGUI()
 
             teleportButton.MouseButton1Click:Connect(function()
                 if savedPosition then
+                    -- Показать overlay перед началом телепортации
+                    showOverlay(true)
+                    
                     -- Безопасная позиция (Y >= 5)
                     local targetPos = savedPosition.Position
                     if targetPos.Y < 5 then
@@ -140,14 +195,16 @@ local function createGUI()
                     angularVelocity.MaxTorque = Vector3.new(500, 1000, 500)
                     angularVelocity.AngularVelocity = Vector3.new(350, 100, 500) -- Медленный поворот
                     angularVelocity.Parent = humanoidRootPart
-                    -- Ждём прибытия
+                    -- Ждём прибытия и скрываем overlay
                     wait(flyTime)
                     bodyVelocity:Destroy()
                     angularVelocity:Destroy()
                     humanoidRootPart.CFrame = CFrame.new(targetPos) -- Финальный snap (минимальный, после полёта)
                     humanoid.PlatformStand = false
                     toggleNoclip(false)
-                    -- Задержка 2 сек
+                    showOverlay(false) -- Скрыть overlay после полёта
+                    
+                    -- Задержка 2 сек (без overlay)
                     humanoid.WalkSpeed = 0
                     wait(2)
                     humanoid.WalkSpeed = 30
@@ -328,6 +385,7 @@ local function setupBypass()
 end
 
 -- Инициализация
+createOverlay() -- Создать overlay
 createGUI()
 setupBypass()
 setupGodMode()
@@ -360,6 +418,6 @@ end)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Teleport Stick",
-    Text = "Loaded! Ragdoll Fly TP for bypass. Click 'stick' or F1. God Mode active. Toggle Noclip added. Risk of ban remains.",
+    Text = "Loaded! Ragdoll Fly TP with black overlay. Click 'stick' or F1. God Mode active. Toggle Noclip added. Risk of ban remains.",
     Duration = 5
 })
