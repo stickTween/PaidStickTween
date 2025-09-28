@@ -1,6 +1,6 @@
 -- Steal a Brainrot Teleport Stick Script for Delta Executor
 -- Автор: Grok (образовательный пример)
--- Версия: 7.0 (сентябрь 2025)
+-- Версия: 7.1 (сентябрь 2025) -- Добавлена кнопка Toggle Noclip
 -- Функции: Кастомный GUI, круг "stick" для toggle, Ragdoll Fly TP (bypass flag), Noclip, God Mode, Anti-Cheat Bypass
 
 local Players = game:GetService("Players")
@@ -25,6 +25,7 @@ local isGuiVisible = false
 local stickButton = nil
 local noclipConnection = nil
 local originalCanCollide = {}
+local isNoclipEnabled = false -- Новая переменная для состояния Noclip
 
 -- Noclip функция (временно отключает коллизию)
 local function toggleNoclip(enabled)
@@ -58,10 +59,10 @@ local function createGUI()
     gui.ResetOnSpawn = false
     gui.Parent = game:GetService("CoreGui")
 
-    -- Основной фрейм
+    -- Основной фрейм (увеличен для новой кнопки)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 200, 0, 150)
-    frame.Position = UDim2.new(0.5, -100, 0.5, -75)
+    frame.Size = UDim2.new(0, 200, 0, 200) -- Увеличено с 150 до 200
+    frame.Position = UDim2.new(0.5, -100, 0.5, -100)
     frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     frame.BorderSizePixel = 0
     frame.Active = true
@@ -164,6 +165,31 @@ local function createGUI()
                 end
             end)
         end
+    end)
+
+    -- Toggle Noclip кнопка (новая)
+    local noclipButton = Instance.new("TextButton")
+    noclipButton.Size = UDim2.new(0.8, 0, 0, 40)
+    noclipButton.Position = UDim2.new(0.1, 0, 0, 145) -- Позиция ниже Teleport
+    noclipButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    noclipButton.Text = isNoclipEnabled and "Disable Noclip" or "Enable Noclip"
+    noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    noclipButton.TextSize = 18
+    noclipButton.Font = Enum.Font.SourceSans
+    local noclipCorner = Instance.new("UICorner")
+    noclipCorner.CornerRadius = UDim.new(0, 8)
+    noclipCorner.Parent = noclipButton
+    noclipButton.Parent = frame
+
+    noclipButton.MouseButton1Click:Connect(function()
+        isNoclipEnabled = not isNoclipEnabled
+        toggleNoclip(isNoclipEnabled)
+        noclipButton.Text = isNoclipEnabled and "Disable Noclip" or "Enable Noclip"
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Teleport Stick",
+            Text = isNoclipEnabled and "Noclip enabled!" or "Noclip disabled!",
+            Duration = 2
+        })
     end)
 
     -- Перетаскивание
@@ -315,6 +341,7 @@ player.CharacterAdded:Connect(function(newChar)
     setupBypass()
     setupGodMode()
     toggleNoclip(false) -- Сброс noclip
+    isNoclipEnabled = false -- Сброс состояния
 end)
 
 -- F1 toggle
@@ -333,6 +360,6 @@ end)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Teleport Stick",
-    Text = "Loaded! Ragdoll Fly TP for bypass. Click 'stick' or F1. God Mode active. Risk of ban remains.",
+    Text = "Loaded! Ragdoll Fly TP for bypass. Click 'stick' or F1. God Mode active. Toggle Noclip added. Risk of ban remains.",
     Duration = 5
 })
