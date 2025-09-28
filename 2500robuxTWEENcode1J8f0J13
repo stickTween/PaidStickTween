@@ -137,7 +137,7 @@ local function createGUI()
                     -- Лёгкий спин для "необычности"
                     local angularVelocity = Instance.new("BodyAngularVelocity")
                     angularVelocity.MaxTorque = Vector3.new(0, 1000, 0)
-                    angularVelocity.AngularVelocity = Vector3.new(0, 2, 0) -- Медленный поворот
+                    angularVelocity.AngularVelocity = Vector3.new(0, 100, 0) -- Медленный поворот
                     angularVelocity.Parent = humanoidRootPart
                     -- Ждём прибытия
                     wait(flyTime)
