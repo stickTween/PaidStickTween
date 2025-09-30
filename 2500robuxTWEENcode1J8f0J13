@@ -193,8 +193,8 @@ local function createGUI()
                     bodyVelocity.Parent = humanoidRootPart
                     -- Лёгкий спин для "необычности"
                     local angularVelocity = Instance.new("BodyAngularVelocity")
-                    angularVelocity.MaxTorque = Vector3.new(500, 1000, 500)
-                    angularVelocity.AngularVelocity = Vector3.new(350, 100, 500) -- Медленный поворот
+                    angularVelocity.MaxTorque = Vector3.new(200, 800, 200)
+                    angularVelocity.AngularVelocity = Vector3.new(250, 100, 650) -- Медленный поворот
                     angularVelocity.Parent = humanoidRootPart
                     -- Ждём прибытия и скрываем overlay
                     wait(flyTime)
